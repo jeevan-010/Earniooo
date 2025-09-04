@@ -131,7 +131,7 @@ function showDashboard(){
   document.getElementById('user-display').innerText=currentUser;
   updateDisplay();
   updateLeaderboard();
-  setInterval(updateLeaderboard,3000);
+  setInterval(updateLeaderboard,3000); // leaderboard updates every 3 seconds
 }
 
 // Logout
@@ -165,29 +165,37 @@ function withdraw(){
 
 // PTC Ads
 const ptcAds = [
-  '//pl27569618.revenuecpmgate.com/a4/41/e0/a441e0e276a6babd1ca5e1c5811e4b49.js',
-  'https://www.revenuecpmgate.com/uauq8v0um?key=8dff7e9b2fdcd08bb40c1be0cadb1793',
-  '//pl27573684.revenuecpmgate.com/9f/7a/80/9f7a80efd7bb42846ab77de67daffa87.js',
-  '//pl27569652.revenuecpmgate.com/14584935058642133f40964318b472f0/invoke.js',
-  '//www.highperformanceformat.com/75a8804076bee4f4832484e78779f115/invoke.js'
+  {type:'js', src:'//pl27569618.revenuecpmgate.com/a4/41/e0/a441e0e276a6babd1ca5e1c5811e4b49.js'},
+  {type:'url', src:'https://www.revenuecpmgate.com/uauq8v0um?key=8dff7e9b2fdcd08bb40c1be0cadb1793'},
+  {type:'js', src:'//pl27573684.revenuecpmgate.com/9f/7a/80/9f7a80efd7bb42846ab77de67daffa87.js'},
+  {type:'js', src:'//pl27569652.revenuecpmgate.com/14584935058642133f40964318b472f0/invoke.js'},
+  {type:'js', src:'//www.highperformanceformat.com/75a8804076bee4f4832484e78779f115/invoke.js'}
 ];
 
 function clickPTC(){
-  let btn=document.getElementById('ptc-ad');
-  btn.disabled=true;
-  btn.innerText='Watching ad...';
-  // Open random ad
+  if(!currentUser){ alert('Login first'); return; }
+  let btn = document.getElementById('ptc-ad');
+  btn.disabled = true;
+  btn.innerText = 'Watching ad...';
+
   let ad = ptcAds[Math.floor(Math.random()*ptcAds.length)];
-  if(ad.endsWith('.js')){
-    let s=document.createElement('script'); s.src=ad; document.body.appendChild(s);
-  } else { window.open(ad,'_blank'); }
-  // Wait 3 sec then award
+
+  if(ad.type==='js'){
+    let script = document.createElement('script');
+    script.src = ad.src;
+    script.async = true;
+    document.body.appendChild(script);
+  } else if(ad.type==='url'){
+    window.open(ad.src,'_blank');
+  }
+
   setTimeout(()=>{
-    let users=JSON.parse(localStorage.getItem('users'));
-    users[currentUser].points+=1;
-    localStorage.setItem('users',JSON.stringify(users));
+    let users = JSON.parse(localStorage.getItem('users'));
+    users[currentUser].points += 1;
+    localStorage.setItem('users', JSON.stringify(users));
     updateDisplay();
-    btn.disabled=false; btn.innerText='Click Here to Earn';
+    btn.disabled = false;
+    btn.innerText = 'Click Here to Earn';
   },3000);
 }
 
@@ -196,17 +204,15 @@ let fakeUsers=[
   {name:'Alpha',points:120},{name:'Beta',points:100},
   {name:'Gamma',points:150},{name:'Delta',points:90},
   {name:'Epsilon',points:130},{name:'Zeta',points:80},
-  {name:'Theta',points:110}
+  {name:'Theta',points:110},{name:'Iota',points:95}
 ];
 
 function updateLeaderboard(){
-  // Add current user optionally at top
-  let displayUsers = [...fakeUsers];
-  displayUsers.forEach(u=>{ u.points+=Math.floor(Math.random()*5); });
-  displayUsers.sort((a,b)=>b.points-a.points);
+  fakeUsers.forEach(u=>{ u.points+=Math.floor(Math.random()*5); });
+  fakeUsers.sort((a,b)=>b.points-a.points);
   let list=document.getElementById('leaderboard-list');
   list.innerHTML='';
-  displayUsers.slice(0,5).forEach(u=>{
+  fakeUsers.slice(0,5).forEach(u=>{
     let li=document.createElement('li'); li.innerText=u.name+' - '+u.points+' pts';
     list.appendChild(li);
   });
