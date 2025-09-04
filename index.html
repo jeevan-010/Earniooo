@@ -18,6 +18,9 @@ h2,h3{text-align:center;}
 .leaderboard h3{text-align:center;}
 .leaderboard ul{list-style:none;padding:0;}
 .leaderboard li{padding:5px 0;border-bottom:1px solid #ccc;}
+#ad-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:9999;text-align:center;}
+#ad-overlay h2{margin-top:50px;}
+#ptc-ad-frame{width:300px;height:250px;border:none;margin-top:20px;}
 footer p{margin:5px;}
 </style>
 </head>
@@ -42,11 +45,15 @@ footer p{margin:5px;}
   </div>
 
   <h3>Click the PTC Ad to Earn Points</h3>
-  <button class="ptc-btn" id="ptc-ad" onclick="clickPTC()">Click Here to Earn</button>
+  <button class="ptc-btn" id="ptc-btn">Click Here to Earn</button>
+
+  <div id="ad-overlay">
+    <h2>Please watch the ad...</h2>
+    <iframe id="ptc-ad-frame"></iframe>
+  </div>
 
   <div class="ads">
-    <h3>All Ads on Website</h3>
-    <!-- Your other ads -->
+    <h3>Website Ads</h3>
     <script type='text/javascript' src='//pl27569618.revenuecpmgate.com/a4/41/e0/a441e0e276a6babd1ca5e1c5811e4b49.js'></script>
     <script type='text/javascript' src='//pl27573684.revenuecpmgate.com/9f/7a/80/9f7a80efd7bb42846ab77de67daffa87.js'></script>
     <script async="async" data-cfasync="false" src="//pl27569652.revenuecpmgate.com/14584935058642133f40964318b472f0/invoke.js"></script>
@@ -71,7 +78,7 @@ footer p{margin:5px;}
   <button onclick="withdraw()">Withdraw</button>
 
   <div class="leaderboard">
-    <h3>Leaderboard (Updated Every Few Seconds)</h3>
+    <h3>Leaderboard (Updates Every Few Seconds)</h3>
     <ul id="leaderboard-list"></ul>
   </div>
 
@@ -84,15 +91,18 @@ footer p{margin:5px;}
 </footer>
 
 <script>
-// Users
+// Users storage
 if(!localStorage.getItem('users')) localStorage.setItem('users','{}');
 let currentUser=null;
 
 // Persistent login
 window.onload = function(){
-  let users = JSON.parse(localStorage.getItem('users')||'{}');
+  let users = JSON.parse(localStorage.getItem('users') || '{}');
   const savedUser = localStorage.getItem('currentUser');
-  if(savedUser && users[savedUser]) { currentUser=savedUser; showDashboard(); }
+  if(savedUser && users[savedUser]) {
+      currentUser = savedUser;
+      showDashboard();
+  }
 }
 
 // Register/Login
@@ -155,84 +165,58 @@ function withdraw(){
   } else alert('Enter valid amount $25-$500 within balance');
 }
 
-// PTC Ads
+// Fake users for leaderboard
+const fakeUsers=['Alice','Bob','Charlie','Dave','Eve','Frank','Grace','Hank','Ivy'];
+function updateLeaderboard(){
+  let users=JSON.parse(localStorage.getItem('users'));
+  let leaderboard = [];
+  // Logged-in user
+  if(currentUser) leaderboard.push({name:currentUser, points:users[currentUser].points});
+  // Fake users
+  fakeUsers.forEach(u=>{
+    leaderboard.push({name:u, points:Math.floor(Math.random()*500)});
+  });
+  leaderboard.sort((a,b)=>b.points-a.points);
+  const list = document.getElementById('leaderboard-list');
+  list.innerHTML='';
+  leaderboard.forEach(u=>{
+    const li=document.createElement('li');
+    li.textContent=u.name + ' - ' + u.points + ' pts';
+    list.appendChild(li);
+  });
+}
+
+// PTC Ads - Must-watch system
 const ptcAds=[
-  {type:'js',src:'//pl27569618.revenuecpmgate.com/a4/41/e0/a441e0e276a6babd1ca5e1c5811e4b49.js'},
-  {type:'url',src:'https://www.revenuecpmgate.com/uauq8v0um?key=8dff7e9b2fdcd08bb40c1be0cadb1793'},
-  {type:'js',src:'//pl27573684.revenuecpmgate.com/9f/7a/80/9f7a80efd7bb42846ab77de67daffa87.js'},
-  {type:'js',src:'//pl27569652.revenuecpmgate.com/14584935058642133f40964318b472f0/invoke.js'},
-  {type:'js',src:'//www.highperformanceformat.com/75a8804076bee4f4832484e78779f115/invoke.js'}
+  '//pl27569618.revenuecpmgate.com/a4/41/e0/a441e0e276a6babd1ca5e1c5811e4b49.js',
+  'https://www.revenuecpmgate.com/uauq8v0um?key=8dff7e9b2fdcd08bb40c1be0cadb1793',
+  '//pl27573684.revenuecpmgate.com/9f/7a/80/9f7a80efd7bb42846ab77de67daffa87.js',
+  '//pl27569652.revenuecpmgate.com/14584935058642133f40964318b472f0/invoke.js',
+  '//www.highperformanceformat.com/75a8804076bee4f4832484e78779f115/invoke.js'
 ];
 
-function clickPTC(){
-  if(!currentUser){alert('Login first');return;}
-  let btn=document.getElementById('ptc-ad');
-  btn.disabled=true;
-  btn.innerText='Watching ad...';
-  let ad=ptcAds[Math.floor(Math.random()*ptcAds.length)];
-  let adShown=false;
-
-  // JS Ad
-  if(ad.type==='js'){
-    let s=document.createElement('script');
-    s.src=ad.src;
-    s.async=true;
-    s.onload=function(){
-      adShown=true;
-      setTimeout(()=>{ addPoint(); },3000);
-    };
-    document.body.appendChild(s);
-  } else { // URL Ad
-    let win=window.open(ad.src,'_blank');
-    adShown=true;
-    setTimeout(()=>{ if(win) win.close(); addPoint(); },3000);
-  }
-
-  function addPoint(){
-    if(!adShown) return;
+document.getElementById('ptc-btn').onclick = function() {
+  if(!currentUser){alert('Login first'); return;}
+  this.disabled = true;
+  let adOverlay = document.getElementById('ad-overlay');
+  let adFrame = document.getElementById('ptc-ad-frame');
+  adOverlay.style.display = 'block';
+  // Pick random ad
+  let ad = ptcAds[Math.floor(Math.random()*ptcAds.length)];
+  adFrame.src = ad;
+  // Must watch 3 seconds
+  setTimeout(function(){
+    adOverlay.style.display = 'none';
+    document.getElementById('ptc-btn').disabled = false;
+    // Add 1 point
     let users=JSON.parse(localStorage.getItem('users'));
     users[currentUser].points+=1;
     localStorage.setItem('users',JSON.stringify(users));
     updateDisplay();
-    btn.disabled=false;
-    btn.innerText='Click Here to Earn';
-  }
-}
-
-// Fake dynamic leaderboard
-let fakeUsers=[
-  {name:'Alpha',points:120,last:'just now'},
-  {name:'Beta',points:100,last:'just now'},
-  {name:'Gamma',points:150,last:'just now'},
-  {name:'Delta',points:90,last:'just now'},
-  {name:'Epsilon',points:130,last:'just now'}
-];
-
-function updateLeaderboard(){
-  fakeUsers.forEach(u=>{
-    let earned=Math.floor(Math.random()*5);
-    u.points+=earned;
-    let now=new Date();
-    u.last=now.getHours()+":"+now.getMinutes()+":"+now.getSeconds();
-  });
-
-  if(currentUser){
-    let users=JSON.parse(localStorage.getItem('users'));
-    let pts=users[currentUser].points;
-    let found=fakeUsers.find(u=>u.name===currentUser);
-    if(found){found.points=pts; found.last='just now';}
-    else{fakeUsers.push({name:currentUser,points:pts,last:'just now'});}
-  }
-
-  fakeUsers.sort((a,b)=>b.points-a.points);
-  let list=document.getElementById('leaderboard-list');
-  list.innerHTML='';
-  fakeUsers.slice(0,5).forEach(u=>{
-    let li=document.createElement('li');
-    li.innerText=u.name+' - '+u.points+' pts (Last Earn: '+u.last+')';
-    list.appendChild(li);
-  });
-}
+    updateLeaderboard();
+    alert('You earned 1 point!');
+  },3000);
+};
 </script>
 
 </body>
