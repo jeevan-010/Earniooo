@@ -25,7 +25,6 @@ footer p{margin:5px;}
 
 <header><h1>Earniooo</h1></header>
 
-<!-- Login/Register -->
 <div class="container" id="auth-container">
   <h2>Login / Register</h2>
   <input type="text" id="username" placeholder="Enter Username">
@@ -34,24 +33,20 @@ footer p{margin:5px;}
   <button onclick="loginUser()">Login</button>
 </div>
 
-<!-- Dashboard -->
 <div class="container" id="dashboard" style="display:none;">
   <h2>Welcome, <span id="user-display"></span>!</h2>
 
-  <!-- Status Panel -->
   <div class="status-panel">
     <p>Earning Status: <span id="points">0</span> points | $: <span id="dollars">0.00</span></p>
     <p>Withdrawal Status: <span id="withdraw-status">None</span></p>
   </div>
 
-  <!-- PTC Button -->
   <h3>Click the PTC Ad to Earn Points</h3>
   <button class="ptc-btn" id="ptc-ad" onclick="clickPTC()">Click Here to Earn</button>
 
-  <!-- Ads Section -->
   <div class="ads">
+    <h3>All Ads on Website</h3>
     <script type='text/javascript' src='//pl27569618.revenuecpmgate.com/a4/41/e0/a441e0e276a6babd1ca5e1c5811e4b49.js'></script>
-    <a href="https://www.revenuecpmgate.com/uauq8v0um?key=8dff7e9b2fdcd08bb40c1be0cadb1793" target="_blank">Check Offers</a>
     <script type='text/javascript' src='//pl27573684.revenuecpmgate.com/9f/7a/80/9f7a80efd7bb42846ab77de67daffa87.js'></script>
     <script async="async" data-cfasync="false" src="//pl27569652.revenuecpmgate.com/14584935058642133f40964318b472f0/invoke.js"></script>
     <div id="container-14584935058642133f40964318b472f0"></div>
@@ -65,21 +60,20 @@ footer p{margin:5px;}
         };
     </script>
     <script type="text/javascript" src="//www.highperformanceformat.com/75a8804076bee4f4832484e78779f115/invoke.js"></script>
+    <a href="https://www.revenuecpmgate.com/uauq8v0um?key=8dff7e9b2fdcd08bb40c1be0cadb1793" target="_blank">Check Offers</a>
   </div>
 
-  <!-- Withdrawal -->
   <h3>Withdrawal</h3>
   <p>Min: $25 | Max: $500</p>
   <input type="text" id="withdraw-address" placeholder="Enter BTC/USDT Address">
   <input type="number" id="withdraw-amount" placeholder="Amount ($)">
   <button onclick="withdraw()">Withdraw</button>
 
-  <!-- Leaderboard -->
   <div class="leaderboard">
-    <h3>Leaderboard</h3>
+    <h3>Leaderboard (Updated Every Few Seconds)</h3>
     <ul id="leaderboard-list"></ul>
   </div>
-  
+
   <button onclick="logout()">Logout</button>
 </div>
 
@@ -89,37 +83,34 @@ footer p{margin:5px;}
 </footer>
 
 <script>
-// Users storage
+// Users
 if(!localStorage.getItem('users')) localStorage.setItem('users','{}');
-let currentUser = null;
+let currentUser=null;
 
 // Persistent login
 window.onload = function(){
   let users = JSON.parse(localStorage.getItem('users')||'{}');
   const savedUser = localStorage.getItem('currentUser');
-  if(savedUser && users[savedUser]){
-    currentUser = savedUser;
-    showDashboard();
-  }
+  if(savedUser && users[savedUser]) { currentUser=savedUser; showDashboard(); }
 }
 
 // Register/Login
 function registerUser(){
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-  if(!username||!password){alert('Fill all fields'); return;}
-  let users = JSON.parse(localStorage.getItem('users'));
-  if(users[username]){alert('User exists'); return;}
-  users[username] = {password: password, points:0};
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value.trim();
+  if(!u||!p){alert('Fill all fields');return;}
+  let users=JSON.parse(localStorage.getItem('users'));
+  if(users[u]){alert('User exists');return;}
+  users[u]={password:p,points:0};
   localStorage.setItem('users',JSON.stringify(users));
   alert('Registered! Login now.');
 }
 function loginUser(){
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-  let users = JSON.parse(localStorage.getItem('users'));
-  if(!users[username]||users[username].password!==password){alert('Invalid'); return;}
-  currentUser = username;
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value.trim();
+  let users=JSON.parse(localStorage.getItem('users'));
+  if(!users[u]||users[u].password!==p){alert('Invalid');return;}
+  currentUser=u;
   localStorage.setItem('currentUser',currentUser);
   showDashboard();
 }
@@ -131,7 +122,7 @@ function showDashboard(){
   document.getElementById('user-display').innerText=currentUser;
   updateDisplay();
   updateLeaderboard();
-  setInterval(updateLeaderboard,3000); // leaderboard updates every 3 seconds
+  setInterval(updateLeaderboard,3000);
 }
 
 // Logout
@@ -142,81 +133,114 @@ function logout(){
   document.getElementById('dashboard').style.display='none';
 }
 
-// Status display
+// Update Status
 function updateDisplay(){
-  let users = JSON.parse(localStorage.getItem('users'));
-  let points = users[currentUser].points;
-  document.getElementById('points').innerText = points;
-  document.getElementById('dollars').innerText = (points/100).toFixed(2);
+  let users=JSON.parse(localStorage.getItem('users'));
+  let pts=users[currentUser].points;
+  document.getElementById('points').innerText=pts;
+  document.getElementById('dollars').innerText=(pts/100).toFixed(2);
 }
 
 // Withdrawal
 function withdraw(){
-  let amount=parseFloat(document.getElementById('withdraw-amount').value);
-  let users = JSON.parse(localStorage.getItem('users'));
+  let amt=parseFloat(document.getElementById('withdraw-amount').value);
+  let users=JSON.parse(localStorage.getItem('users'));
   let balance=users[currentUser].points/100;
-  if(amount>=25 && amount<=500 && amount<=balance){
-    users[currentUser].points-=amount*100;
+  if(amt>=25 && amt<=500 && amt<=balance){
+    users[currentUser].points-=amt*100;
     localStorage.setItem('users',JSON.stringify(users));
     updateDisplay();
-    document.getElementById('withdraw-status').innerText='Requested: $'+amount;
+    document.getElementById('withdraw-status').innerText='Requested: $'+amt;
   } else alert('Enter valid amount $25-$500 within balance');
 }
 
 // PTC Ads
-const ptcAds = [
-  {type:'js', src:'//pl27569618.revenuecpmgate.com/a4/41/e0/a441e0e276a6babd1ca5e1c5811e4b49.js'},
-  {type:'url', src:'https://www.revenuecpmgate.com/uauq8v0um?key=8dff7e9b2fdcd08bb40c1be0cadb1793'},
-  {type:'js', src:'//pl27573684.revenuecpmgate.com/9f/7a/80/9f7a80efd7bb42846ab77de67daffa87.js'},
-  {type:'js', src:'//pl27569652.revenuecpmgate.com/14584935058642133f40964318b472f0/invoke.js'},
-  {type:'js', src:'//www.highperformanceformat.com/75a8804076bee4f4832484e78779f115/invoke.js'}
+const ptcAds=[
+  {type:'js',src:'//pl27569618.revenuecpmgate.com/a4/41/e0/a441e0e276a6babd1ca5e1c5811e4b49.js'},
+  {type:'url',src:'https://www.revenuecpmgate.com/uauq8v0um?key=8dff7e9b2fdcd08bb40c1be0cadb1793'},
+  {type:'js',src:'//pl27573684.revenuecpmgate.com/9f/7a/80/9f7a80efd7bb42846ab77de67daffa87.js'},
+  {type:'js',src:'//pl27569652.revenuecpmgate.com/14584935058642133f40964318b472f0/invoke.js'},
+  {type:'js',src:'//www.highperformanceformat.com/75a8804076bee4f4832484e78779f115/invoke.js'}
 ];
 
 function clickPTC(){
-  if(!currentUser){ alert('Login first'); return; }
-  let btn = document.getElementById('ptc-ad');
-  btn.disabled = true;
-  btn.innerText = 'Watching ad...';
+  if(!currentUser){alert('Login first');return;}
+  let btn=document.getElementById('ptc-ad');
+  btn.disabled=true;
+  btn.innerText='Watching ad...';
+  let ad=ptcAds[Math.floor(Math.random()*ptcAds.length)];
+  let adShown=false;
 
-  let ad = ptcAds[Math.floor(Math.random()*ptcAds.length)];
-
+  // If JS ad, create script and wait 3 sec
   if(ad.type==='js'){
-    let script = document.createElement('script');
-    script.src = ad.src;
-    script.async = true;
-    document.body.appendChild(script);
-  } else if(ad.type==='url'){
-    window.open(ad.src,'_blank');
+    let s=document.createElement('script');
+    s.src=ad.src;
+    s.async=true;
+    s.onload=function(){ // ad "loaded"
+      adShown=true;
+      setTimeout(()=>{
+        addPoint();
+      },3000); // user sees ad for 3 sec
+    };
+    document.body.appendChild(s);
+  } else { // URL ad
+    let win=window.open(ad.src,'_blank');
+    adShown=true;
+    setTimeout(()=>{
+      if(win) win.close();
+      addPoint();
+    },3000); // 3 sec view
   }
 
-  setTimeout(()=>{
-    let users = JSON.parse(localStorage.getItem('users'));
-    users[currentUser].points += 1;
-    localStorage.setItem('users', JSON.stringify(users));
+  function addPoint(){
+    if(!adShown) return;
+    let users=JSON.parse(localStorage.getItem('users'));
+    users[currentUser].points+=1;
+    localStorage.setItem('users',JSON.stringify(users));
     updateDisplay();
-    btn.disabled = false;
-    btn.innerText = 'Click Here to Earn';
-  },3000);
+    btn.disabled=false;
+    btn.innerText='Click Here to Earn';
+  }
 }
 
-// Fake dynamic leaderboard
+// Fake dynamic leaderboard with timestamps
 let fakeUsers=[
-  {name:'Alpha',points:120},{name:'Beta',points:100},
-  {name:'Gamma',points:150},{name:'Delta',points:90},
-  {name:'Epsilon',points:130},{name:'Zeta',points:80},
-  {name:'Theta',points:110},{name:'Iota',points:95}
+  {name:'Alpha',points:120,last:'just now'},
+  {name:'Beta',points:100,last:'just now'},
+  {name:'Gamma',points:150,last:'just now'},
+  {name:'Delta',points:90,last:'just now'},
+  {name:'Epsilon',points:130,last:'just now'},
+  {name:'Zeta',points:80,last:'just now'},
+  {name:'Theta',points:110,last:'just now'},
+  {name:'Iota',points:95,last:'just now'}
 ];
 
 function updateLeaderboard(){
-  fakeUsers.forEach(u=>{ u.points+=Math.floor(Math.random()*5); });
+  fakeUsers.forEach(u=>{
+    let earned=Math.floor(Math.random()*5);
+    u.points+=earned;
+    let now=new Date();
+    u.last=now.getHours()+":"+now.getMinutes()+":"+now.getSeconds();
+  });
+
+  if(currentUser){
+    let users=JSON.parse(localStorage.getItem('users'));
+    let pts=users[currentUser].points;
+    let found=fakeUsers.find(u=>u.name===currentUser);
+    if(found){found.points=pts; found.last='just now';}
+    else{fakeUsers.push({name:currentUser,points:pts,last:'just now'});}
+  }
+
   fakeUsers.sort((a,b)=>b.points-a.points);
   let list=document.getElementById('leaderboard-list');
   list.innerHTML='';
   fakeUsers.slice(0,5).forEach(u=>{
-    let li=document.createElement('li'); li.innerText=u.name+' - '+u.points+' pts';
+    let li=document.createElement('li');
+    li.innerText=u.name+' - '+u.points+' pts (Last Earn: '+u.last+')';
     list.appendChild(li);
   });
 }
 </script>
+
 </body>
 </html>
