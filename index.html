@@ -46,6 +46,7 @@ footer p{margin:5px;}
 
   <div class="ads">
     <h3>All Ads on Website</h3>
+    <!-- Your other ads -->
     <script type='text/javascript' src='//pl27569618.revenuecpmgate.com/a4/41/e0/a441e0e276a6babd1ca5e1c5811e4b49.js'></script>
     <script type='text/javascript' src='//pl27573684.revenuecpmgate.com/9f/7a/80/9f7a80efd7bb42846ab77de67daffa87.js'></script>
     <script async="async" data-cfasync="false" src="//pl27569652.revenuecpmgate.com/14584935058642133f40964318b472f0/invoke.js"></script>
@@ -171,25 +172,20 @@ function clickPTC(){
   let ad=ptcAds[Math.floor(Math.random()*ptcAds.length)];
   let adShown=false;
 
-  // If JS ad, create script and wait 3 sec
+  // JS Ad
   if(ad.type==='js'){
     let s=document.createElement('script');
     s.src=ad.src;
     s.async=true;
-    s.onload=function(){ // ad "loaded"
+    s.onload=function(){
       adShown=true;
-      setTimeout(()=>{
-        addPoint();
-      },3000); // user sees ad for 3 sec
+      setTimeout(()=>{ addPoint(); },3000);
     };
     document.body.appendChild(s);
-  } else { // URL ad
+  } else { // URL Ad
     let win=window.open(ad.src,'_blank');
     adShown=true;
-    setTimeout(()=>{
-      if(win) win.close();
-      addPoint();
-    },3000); // 3 sec view
+    setTimeout(()=>{ if(win) win.close(); addPoint(); },3000);
   }
 
   function addPoint(){
@@ -203,16 +199,13 @@ function clickPTC(){
   }
 }
 
-// Fake dynamic leaderboard with timestamps
+// Fake dynamic leaderboard
 let fakeUsers=[
   {name:'Alpha',points:120,last:'just now'},
   {name:'Beta',points:100,last:'just now'},
   {name:'Gamma',points:150,last:'just now'},
   {name:'Delta',points:90,last:'just now'},
-  {name:'Epsilon',points:130,last:'just now'},
-  {name:'Zeta',points:80,last:'just now'},
-  {name:'Theta',points:110,last:'just now'},
-  {name:'Iota',points:95,last:'just now'}
+  {name:'Epsilon',points:130,last:'just now'}
 ];
 
 function updateLeaderboard(){
